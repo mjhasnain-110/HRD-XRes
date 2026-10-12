@@ -1,0 +1,117 @@
+paths:
+  inputs: Inputs/hgsoc_hrd_data
+  processed: Processed
+  results: Results
+  models: Models
+  logs: Logs
+files:
+  tcga:
+    star_counts: tcga/TCGA-OV.star_counts.tsv.gz
+    ebpp: tcga/EBPlusPlusAdjustPANCAN_IlluminaHiSeq_RNASeqV2.geneExp.tsv
+    cdr: tcga/TCGA-CDR-SupplementalTableS1.xlsx
+    clinical_pancan: tcga/clinical_PANCAN_patient_with_followup.tsv
+    sample_quality: tcga/merged_sample_quality_annotations.tsv
+    ddr_scores: tcga/DDRscores.tsv
+    ddr_samples: tcga/Samples.tsv
+    ddr_score_names: tcga/Scores.tsv
+    ddr_gene_alterations: tcga/GeneAlterations.tsv
+    ddr_genes: tcga/Genes.tsv
+  spectrum:
+    dir: scrna/spectrum
+    url_table: scrna/spectrum/spectrum_h5ad_urls.tsv
+    supp_table: scrna/spectrum/41586_2022_5496_MOESM4_ESM.xlsx
+    supp_sheet: Mutational signatures
+  gse165897:
+    counts: scrna/GSE165897/GSE165897_UMIcounts_HGSOC.tsv.gz
+    cellinfo: scrna/GSE165897/GSE165897_cellInfo_HGSOC.tsv.gz
+  denisenko:
+    raw_dir: spatial/GSE211956/raw
+    matrix_dir: spatial/GSE211956/matrix
+  stur:
+    raw_dir: spatial/GSE189843/raw
+    matrix_dir: spatial/GSE189843/matrix
+    label_override: config/stur_labels.tsv
+  bulk:
+    dir: bulk_validation
+    platform_dir: bulk_validation/platforms
+    curated_dir: bulk_validation/curatedOvarianData
+  reactome_gmt: priors/ReactomePathways.gmt
+tcga:
+  expression_source: star
+  hrd_threshold: 42
+  hrd_threshold_sensitivity:
+  - 33
+  - 38
+  - 42
+  - 46
+  - 50
+  platinum_window_days: 365
+geo_cohorts:
+  GSE63885:
+    role: platinum_brca_survival
+  GSE51373:
+    role: platinum
+  GSE140082:
+    role: survival
+  GSE9891:
+    role: survival
+singlecell:
+  metacell_size: 30
+  min_cells_per_sample: 20
+  malignant_regex: cancer|malignan|tumou?r|^EOC$
+  nonmalignant_regex: non.?malig|normal|ciliated
+  knn_smoothing_k: 15
+  max_cells_per_sample: 3000
+spatial:
+  min_counts: 500
+  min_genes: 250
+  tumor_fraction_threshold: 0.4
+features:
+  min_cpm: 1.0
+  min_frac_samples: 0.1
+  pathway_min_size: 10
+  pathway_max_size: 300
+  min_external_gene_coverage: 0.6
+model:
+  hidden_dim: 256
+  latent_dim: 64
+  domain_hidden: 64
+  heads:
+  - hrd
+  - hr
+  - brca
+  - plat
+  - cox
+  - purity
+  task_weights:
+    hrd: 1.0
+    hr: 1.0
+    brca: 0.5
+    plat: 0.5
+    cox: 0.5
+    purity: 0.3
+training:
+  batch_size: 64
+  max_steps: 2000
+  eval_every: 50
+  patience: 12
+  weight_decay: 0.0001
+  grl_gamma: 10.0
+  early_stop_fraction: 0.15
+  outer_folds: 5
+  inner_folds: 3
+  n_seeds_cv: 2
+  n_seeds_final: 10
+  seed: 2026
+  device: cpu
+  grid:
+    lr:
+    - 0.001
+    - 0.0003
+    dropout:
+    - 0.3
+    lambda_domain:
+    - 0.1
+    - 0.5
+evaluation:
+  n_bootstrap: 2000
